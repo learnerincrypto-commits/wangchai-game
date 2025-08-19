@@ -12,25 +12,29 @@
       flex-direction: column;
       background: #e0f7fa;
       font-family: Arial, sans-serif;
+      margin: 0;
     }
     .avatar {
       position: relative;
-      width: 300px;
+      width: 80vw;       /* 自适应屏幕宽度 */
+      max-width: 400px;  /* 最大不超过400px，适合电脑 */
     }
     .avatar img {
       width: 100%;
+      height: auto;
       display: block;
     }
     .hotspot {
       position: absolute;
       cursor: pointer;
-      background: rgba(255, 0, 0, 0);
+      background: rgba(255, 0, 0, 0); /* 热点透明 */
     }
     #score, #timer {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: bold;
       margin: 5px;
       color: #00796b;
+      text-align: center;
     }
     #reaction {
       margin-top: 10px;
@@ -51,28 +55,32 @@
       box-shadow: 0 5px 20px rgba(0,0,0,0.3);
       text-align: center;
       z-index: 1000;
+      width: 90%;
+      max-width: 400px;
     }
-    #videoMenu h2 { margin-bottom: 15px; }
+    #videoMenu h2 { margin-bottom: 15px; font-size: 20px; }
     #videoMenu button {
       display: block;
       margin: 8px auto;
-      padding: 8px 15px;
+      padding: 12px 20px;
       border: none;
       background: #00796b;
       color: white;
       border-radius: 5px;
       cursor: pointer;
+      font-size: 16px;
     }
     #videoMenu button:hover { background: #004d40; }
     #videoPlayer {
       margin-top: 10px;
-      width: 300px;
+      width: 100%;
       display: none;
+      border-radius: 8px;
     }
     /* 音乐按钮 */
     #musicControl {
       margin-top: 15px;
-      padding: 8px 15px;
+      padding: 10px 20px;
       background: #ff9800;
       border: none;
       border-radius: 5px;
@@ -90,23 +98,23 @@
 
   <div class="avatar">
     <img id="dog" src="wangchai 1.png" alt="狗头 Dog Head">
-    <!-- 点击区域 -->
-    <div class="hotspot" style="left:80px; top:100px; width:50px; height:40px;" onclick="react(true, '眼睛/Eyes', 10)"></div>
-    <div class="hotspot" style="left:120px; top:170px; width:60px; height:40px;" onclick="react(true, '嘴巴/Mouth', 20)"></div>
-    <div class="hotspot" style="left:200px; top:50px; width:60px; height:60px;" onclick="react(false, '耳朵/Ears', -10)"></div>
+    <!-- 点击区域 (百分比定位，兼容手机+电脑) -->
+    <div class="hotspot" style="left:27%; top:33%; width:17%; height:12%;" onclick="react(true, '眼睛/Eyes', 10)"></div>
+    <div class="hotspot" style="left:40%; top:57%; width:20%; height:13%;" onclick="react(true, '嘴巴/Mouth', 20)"></div>
+    <div class="hotspot" style="left:65%; top:15%; width:18%; height:18%;" onclick="react(false, '耳朵/Ears', -10)"></div>
   </div>
 
   <div id="reaction">👆 点击旺柴看看反应！<br>👆 Tap Wangchai to see reaction!</div>
   <button id="musicControl" onclick="toggleMusic()">暂停音乐 / Pause Music</button>
 
   <!-- 背景音乐 -->
-  <audio id="bgm" src="bgm.mp3" autoplay loop></audio>
+  <audio id="bgm" src="bgm.mp3" loop></audio>
 
   <!-- 视频菜单 -->
   <div id="videoMenu">
     <h2>🎬 菜单 / Video Menu</h2>
     <div id="videoOptions"></div>
-    <video id="videoPlayer" controls></video>
+    <video id="videoPlayer" controls playsinline></video>
   </div>
 
   <script>
@@ -114,7 +122,7 @@
     let timeLeft = 30;
     let countdown;
     let hotspotMove;
-    let phase = 1; // 当前阶段 / Current phase
+    let phase = 1;
 
     const faces = [
       "wangchai 1.png","wangchai 2.png","wangchai 3.png",
@@ -196,14 +204,14 @@
 
     function moveHotspots() {
       document.querySelectorAll(".hotspot").forEach(hs => {
-        hs.style.left = Math.random() * 200 + "px";
-        hs.style.top = Math.random() * 150 + "px";
+        hs.style.left = Math.random() * 70 + "%";
+        hs.style.top = Math.random() * 60 + "%";
       });
     }
 
     function openMenu(title, options) {
       clearInterval(countdown);
-      bgm.pause(); // 暂停背景音乐 / Pause music
+      bgm.pause();
       document.getElementById("videoMenu").style.display = "block";
       document.querySelector("#videoMenu h2").innerHTML = title;
       const optionsDiv = document.getElementById("videoOptions");
@@ -230,7 +238,7 @@
       const player = document.getElementById("videoPlayer");
       player.pause();
       player.style.display = "none";
-      bgm.play(); // 继续播放音乐 / Resume music
+      bgm.play();
       startTimer();
     }
 
@@ -243,6 +251,11 @@
         musicBtn.innerText = "播放音乐 / Play Music";
       }
     }
+
+    // ⚠️ 移动端需要点击后才允许播放音乐
+    document.body.addEventListener("click", () => {
+      if (bgm.paused) bgm.play();
+    }, { once: true });
 
     setPhase(1);
   </script>
