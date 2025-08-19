@@ -3,36 +3,80 @@
 <head>
   <meta charset="UTF-8">
   <title>排行榜 Leaderboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body{background:#f0f4c3;font-family:Arial,sans-serif;text-align:center;padding:20px;}
-    table{margin:auto;border-collapse:collapse;width:95%;max-width:500px;background:white;box-shadow:0 3px 10px rgba(0,0,0,0.2);}
-    th,td{border:1px solid #ccc;padding:10px;}
-    th{background:#8bc34a;color:white;}
-    tr:nth-child(even){background:#f9fbe7;}
-    #clearBtn{margin-top:20px;padding:8px 15px;background:#f44336;color:white;border:none;border-radius:5px;cursor:pointer;}
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f8ff;
+      text-align: center;
+      padding: 40px;
+    }
+    h1 {
+      color: #00796b;
+    }
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 60%;
+      background: white;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px;
+      font-size: 18px;
+    }
+    th {
+      background: #00796b;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #ff9800;
+      color: white;
+      border-radius: 5px;
+      text-decoration: none;
+    }
+    a:hover {
+      background: #e68900;
+    }
   </style>
 </head>
 <body>
-  <h1>🏆 排行榜<br>🏆 Leaderboard</h1>
-  <table id="leaderboardTable">
-    <tr><th>排名<br>Rank</th><th>玩家<br>Player</th><th>分数<br>Score</th></tr>
+  <h1>🏆 排行榜 / Leaderboard</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>排名 / Rank</th>
+        <th>玩家 / Player</th>
+        <th>分数 / Score</th>
+      </tr>
+    </thead>
+    <tbody id="leaderboard"></tbody>
   </table>
-  <button id="clearBtn" onclick="clearBoard()">清空 / Clear</button>
+
+  <a href="index.html">返回游戏 / Back to Game</a>
 
   <script>
-    function loadLeaderboard(){
-      let leaderboard=JSON.parse(localStorage.getItem("leaderboard"))||[];
-      leaderboard.sort((a,b)=>b.score-a.score);
-      let table=document.getElementById("leaderboardTable");
-      leaderboard.forEach((p,i)=>{
-        let row=table.insertRow();
-        row.insertCell(0).innerText=i+1;
-        row.insertCell(1).innerText=p.name;
-        row.insertCell(2).innerText=p.score;
+    function loadLeaderboard() {
+      const data = JSON.parse(localStorage.getItem("leaderboard")) || [];
+      data.sort((a,b) => b.score - a.score); // 按分数排序
+      const tbody = document.getElementById("leaderboard");
+      tbody.innerHTML = "";
+      data.forEach((entry, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${index+1}</td>
+          <td>${entry.name}</td>
+          <td>${entry.score}</td>
+        `;
+        tbody.appendChild(tr);
       });
     }
-    function clearBoard(){ if(confirm("确定要清空？/Clear?")){localStorage.removeItem("leaderboard");location.reload();}}
     loadLeaderboard();
   </script>
 </body>
