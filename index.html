@@ -8,44 +8,88 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      height: 100vh;
       flex-direction: column;
       background: #e0f7fa;
       font-family: Arial, sans-serif;
-      margin: 0;
-      height: 100vh;
+    }
+    .avatar {
+      position: relative;
+      width: 300px;
+    }
+    .avatar img {
+      width: 100%;
+      display: block;
+    }
+    .hotspot {
+      position: absolute;
+      cursor: pointer;
+      background: rgba(255, 0, 0, 0);
+    }
+    #score, #timer {
+      font-size: 22px;
+      font-weight: bold;
+      margin: 5px;
+      color: #00796b;
+    }
+    #reaction {
+      margin-top: 10px;
+      font-size: 18px;
+      color: #333;
       text-align: center;
     }
-    .avatar { position: relative; width: 300px; }
-    .avatar img { width: 100%; display: block; }
-    .hotspot { position: absolute; cursor: pointer; background: rgba(255,0,0,0); }
-    #score, #timer { font-size: 22px; font-weight: bold; margin: 5px; color: #00796b; }
-    #reaction { margin-top: 10px; font-size: 18px; color: #333; text-align: center; }
-
     /* 视频菜单 */
     #videoMenu {
-      display: none; position: fixed; top: 50%; left: 50%;
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -50%);
-      background: white; padding: 20px; border-radius: 10px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
       box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-      text-align: center; z-index: 1000;
+      text-align: center;
+      z-index: 1000;
     }
     #videoMenu h2 { margin-bottom: 15px; }
     #videoMenu button {
-      display: block; margin: 8px auto; padding: 8px 15px;
-      border: none; background: #00796b; color: white;
-      border-radius: 5px; cursor: pointer;
+      display: block;
+      margin: 8px auto;
+      padding: 8px 15px;
+      border: none;
+      background: #00796b;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
     }
     #videoMenu button:hover { background: #004d40; }
-    #videoPlayer { margin-top: 10px; width: 300px; display: none; }
-
+    #videoPlayer {
+      margin-top: 10px;
+      width: 300px;
+      display: none;
+    }
     /* 音乐按钮 */
     #musicControl {
-      margin-top: 15px; padding: 8px 15px;
-      background: #ff9800; border: none;
-      border-radius: 5px; cursor: pointer;
-      color: white; font-size: 16px;
+      margin-top: 15px;
+      padding: 8px 15px;
+      background: #ff9800;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      color: white;
+      font-size: 16px;
     }
     #musicControl:hover { background: #e68900; }
+    /* 排行榜 */
+    #leaderboard {
+      margin-top: 20px;
+      padding: 10px;
+      background: #ffffffaa;
+      border-radius: 10px;
+      width: 300px;
+    }
+    #leaderboard h2 { margin: 0 0 10px; font-size: 20px; }
   </style>
 </head>
 <body>
@@ -56,9 +100,9 @@
   <div class="avatar">
     <img id="dog" src="wangchai 1.png" alt="狗头 Dog Head">
     <!-- 点击区域 -->
-    <div class="hotspot" style="left:80px; top:100px; width:50px; height:40px;" onclick="react(true, '眼睛/Eyes', 10)"></div>
-    <div class="hotspot" style="left:120px; top:170px; width:60px; height:40px;" onclick="react(true, '嘴巴/Mouth', 20)"></div>
-    <div class="hotspot" style="left:200px; top:50px; width:60px; height:60px;" onclick="react(false, '耳朵/Ears', -10)"></div>
+    <div class="hotspot" id="hs1" style="left:80px; top:100px; width:60px; height:60px;" onclick="react(true, '眼睛/Eyes', 10)"></div>
+    <div class="hotspot" id="hs2" style="left:120px; top:170px; width:60px; height:60px;" onclick="react(true, '嘴巴/Mouth', 20)"></div>
+    <div class="hotspot" id="hs3" style="left:200px; top:50px; width:60px; height:60px;" onclick="react(false, '耳朵/Ears', -20)"></div>
   </div>
 
   <div id="reaction">👆 点击旺柴看看反应！<br>👆 Tap Wangchai to see reaction!</div>
@@ -74,18 +118,24 @@
     <video id="videoPlayer" controls></video>
   </div>
 
+  <!-- 排行榜 -->
+  <div id="leaderboard">
+    <h2>🏆 排行榜 / Leaderboard</h2>
+    <ol id="leaderboardList"></ol>
+  </div>
+
   <script>
     let score = 0;
     let timeLeft = 30;
     let countdown;
     let hotspotMove;
     let phase = 1; // 当前阶段 / Current phase
+    let hotspotSize = 60;
 
     const faces = [
-      "wangchai 1.png","wangchai 2.png","wangchai 3.png","wangchai 4.png","wangchai 5.png",
-      "wangchai 6.png","wangchai 7.png","wangchai 8.png","wangchai 9.png","wangchai 10.png",
-      "wangchai 11.png","wangchai 12.png","wangchai 13.png","wangchai 14.png","wangchai 15.png",
-      "wangchai 16.png","wangchai 17.png","wangchai 18.png","wangchai 19.png","wangchai 20.png"
+      "wangchai 1.png","wangchai 2.png","wangchai 3.png",
+      "wangchai 4.png","wangchai 5.png","wangchai 6.png",
+      "wangchai 7.png","wangchai 8.png","wangchai 9.png","wangchai 10.png"
     ];
 
     const bgm = document.getElementById("bgm");
@@ -97,7 +147,7 @@
         timeLeft--;
         document.getElementById("timer").innerText = "剩余时间/Time Left：" + timeLeft + " 秒/sec";
         if (timeLeft <= 0) {
-          endGame();
+          gameOver();
         }
       }, 1000);
     }
@@ -106,16 +156,31 @@
       phase = newPhase;
       clearInterval(hotspotMove);
       if (phase === 1) {
-        if (timeLeft < 30) timeLeft = 30;
+        timeLeft = Math.max(timeLeft, 25);
+        hotspotSize = 60;
       } else if (phase === 2) {
-        if (timeLeft < 25) timeLeft = 25;
+        timeLeft = Math.max(timeLeft, 20);
+        hotspotSize = 40;
         hotspotMove = setInterval(moveHotspots, 5000);
       } else if (phase === 3) {
-        if (timeLeft < 20) timeLeft = 20;
-        hotspotMove = setInterval(moveHotspots, 5000);
+        timeLeft = Math.max(timeLeft, 15);
+        hotspotSize = 30;
+        hotspotMove = setInterval(moveHotspots, 3000);
+      } else if (phase === 4) {
+        timeLeft = Math.max(timeLeft, 10);
+        hotspotSize = 20;
+        hotspotMove = setInterval(moveHotspots, 1000);
       }
+      resizeHotspots();
       document.getElementById("timer").innerText = "剩余时间/Time Left：" + timeLeft + " 秒/sec";
       startTimer();
+    }
+
+    function resizeHotspots() {
+      document.querySelectorAll(".hotspot").forEach(hs => {
+        hs.style.width = hotspotSize + "px";
+        hs.style.height = hotspotSize + "px";
+      });
     }
 
     function react(correct, part, points) {
@@ -127,7 +192,7 @@
         timeLeft += 2;
       } else {
         score += points;
-        timeLeft -= 3;
+        timeLeft -= 5; // 错误惩罚更狠
       }
       if (score < 0) score = 0;
       document.getElementById("score").innerText = "分数/Score：" + score;
@@ -138,22 +203,22 @@
         " (积分/Points " + (points > 0 ? "+" : "") + points + ")";
 
       if (score >= 100 && phase === 1) {
-        openMenu("🎉 你到达 100 分！选择一个视频：<br>🎉 You reached 100 points! Choose a video:", [
+        openMenu("🎉 100分！选择一个视频<br>🎉 100 Points! Choose a video:", [
           {name:"开心 / Happy", file:"happy.mp4"},
           {name:"搞笑 / Funny", file:"funny.mp4"},
           {name:"神秘 / Mystery", file:"mystery.mp4"}
         ]);
         setPhase(2);
       } else if (score >= 200 && phase === 2) {
-        openMenu("🎉 你到达 200 分！神秘菜单：<br>🎉 You reached 200 points! Mystery video:", [
+        openMenu("🎉 200分！神秘视频<br>🎉 200 Points! Mystery video:", [
           {name:"神秘 / Secret", file:"secret.mp4"}
         ]);
         setPhase(3);
-      } else if (score >= 300) {
-        openMenu("🏆 300 分满分！终极彩蛋！<br>🏆 300 points! Final Easter Egg!", [
+      } else if (score >= 300 && phase === 3) {
+        openMenu("🏆 300分！终极彩蛋<br>🏆 300 Points! Final Easter Egg:", [
           {name:"终极彩蛋 / Ultimate Egg", file:"ultimate.mp4"}
         ]);
-        clearInterval(countdown);
+        setPhase(4);
       }
     }
 
@@ -207,23 +272,38 @@
       }
     }
 
-    // 🏆 游戏结束 + 保存成绩 + 跳转排行榜
-    function endGame() {
-      clearInterval(countdown);
-      clearInterval(hotspotMove);
-
-      const playerName = prompt("请输入你的名字 / Enter your name:");
-      if (playerName) {
-        const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
-        leaderboard.push({ name: playerName, score: score });
-        localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
-        alert("成绩已保存！你可以去排行榜查看。\nScore saved! You can check the leaderboard.");
-        window.location.href = "leaderboard.html";
-      } else {
-        alert("未输入名字，成绩不会保存。\nNo name entered, score not saved.");
-      }
+    // ✅ Leaderboard 部分
+    function saveScore(name, score) {
+      let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+      leaderboard.push({name, score});
+      leaderboard.sort((a,b) => b.score - a.score);
+      leaderboard = leaderboard.slice(0, 10);
+      localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+      displayLeaderboard();
     }
 
+    function displayLeaderboard() {
+      let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+      const list = document.getElementById("leaderboardList");
+      list.innerHTML = "";
+      leaderboard.forEach(entry => {
+        const li = document.createElement("li");
+        li.textContent = `${entry.name} - ${entry.score} 分`;
+        list.appendChild(li);
+      });
+    }
+
+    function gameOver() {
+      clearInterval(countdown);
+      let playerName = prompt("请输入名字 / Enter your name:");
+      if (playerName) {
+        saveScore(playerName, score);
+      }
+      alert("时间到！游戏结束！\nTime’s up! Game Over!");
+    }
+
+    // 初始化排行榜
+    displayLeaderboard();
     setPhase(1);
   </script>
 </body>
