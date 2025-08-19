@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>排行榜 Leaderboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body{background:#f0f4c3;font-family:Arial,sans-serif;text-align:center;padding:20px;}
+    table{margin:auto;border-collapse:collapse;width:95%;max-width:500px;background:white;box-shadow:0 3px 10px rgba(0,0,0,0.2);}
+    th,td{border:1px solid #ccc;padding:10px;}
+    th{background:#8bc34a;color:white;}
+    tr:nth-child(even){background:#f9fbe7;}
+    #clearBtn{margin-top:20px;padding:8px 15px;background:#f44336;color:white;border:none;border-radius:5px;cursor:pointer;}
+  </style>
+</head>
+<body>
+  <h1>🏆 排行榜<br>🏆 Leaderboard</h1>
+  <table id="leaderboardTable">
+    <tr><th>排名<br>Rank</th><th>玩家<br>Player</th><th>分数<br>Score</th></tr>
+  </table>
+  <button id="clearBtn" onclick="clearBoard()">清空 / Clear</button>
+
+  <script>
+    function loadLeaderboard(){
+      let leaderboard=JSON.parse(localStorage.getItem("leaderboard"))||[];
+      leaderboard.sort((a,b)=>b.score-a.score);
+      let table=document.getElementById("leaderboardTable");
+      leaderboard.forEach((p,i)=>{
+        let row=table.insertRow();
+        row.insertCell(0).innerText=i+1;
+        row.insertCell(1).innerText=p.name;
+        row.insertCell(2).innerText=p.score;
+      });
+    }
+    function clearBoard(){ if(confirm("确定要清空？/Clear?")){localStorage.removeItem("leaderboard");location.reload();}}
+    loadLeaderboard();
+  </script>
+</body>
+</html>
