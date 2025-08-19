@@ -188,4 +188,63 @@
         setPhase(3);
       } else if (score >= 300) {
         openMenu("🏆 300 分满分！终极彩蛋！<br>🏆 300 points! Final Easter Egg!", [
-          {name:"终
+          {name:"终极彩蛋 / Ultimate Egg", file:"ultimate.mp4"}
+        ]);
+        clearInterval(countdown);
+      }
+    }
+
+    function moveHotspots() {
+      document.querySelectorAll(".hotspot").forEach(hs => {
+        hs.style.left = Math.random() * 200 + "px";
+        hs.style.top = Math.random() * 150 + "px";
+      });
+    }
+
+    function openMenu(title, options) {
+      clearInterval(countdown);
+      bgm.pause(); // 暂停背景音乐 / Pause music
+      document.getElementById("videoMenu").style.display = "block";
+      document.querySelector("#videoMenu h2").innerHTML = title;
+      const optionsDiv = document.getElementById("videoOptions");
+      optionsDiv.innerHTML = "";
+      options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.innerText = opt.name;
+        btn.onclick = () => playVideo(opt.file);
+        optionsDiv.appendChild(btn);
+      });
+    }
+
+    function playVideo(file) {
+      const player = document.getElementById("videoPlayer");
+      player.src = file;
+      player.style.display = "block";
+      player.play();
+      document.getElementById("videoOptions").innerHTML = "🎬 正在播放... / Now Playing...";
+      player.onended = () => closeMenu();
+    }
+
+    function closeMenu() {
+      document.getElementById("videoMenu").style.display = "none";
+      const player = document.getElementById("videoPlayer");
+      player.pause();
+      player.style.display = "none";
+      bgm.play(); // 继续播放音乐 / Resume music
+      startTimer();
+    }
+
+    function toggleMusic() {
+      if (bgm.paused) {
+        bgm.play();
+        musicBtn.innerText = "暂停音乐 / Pause Music";
+      } else {
+        bgm.pause();
+        musicBtn.innerText = "播放音乐 / Play Music";
+      }
+    }
+
+    setPhase(1);
+  </script>
+</body>
+</html>
