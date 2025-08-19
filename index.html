@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>旺柴互动小游戏</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      background: #e0f7fa;
+      font-family: Arial, sans-serif;
+    }
+    .avatar {
+      position: relative;
+      width: 300px;
+    }
+    .avatar img {
+      width: 100%;
+      display: block;
+    }
+    .hotspot {
+      position: absolute;
+      cursor: pointer;
+      background: rgba(255, 0, 0, 0);
+    }
+    #score, #timer {
+      font-size: 22px;
+      font-weight: bold;
+      margin: 5px;
+      color: #00796b;
+    }
+    #reaction {
+      margin-top: 10px;
+      font-size: 18px;
+      color: #333;
+    }
+    /* 视频菜单 */
+    #videoMenu {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      text-align: center;
+      z-index: 1000;
+    }
+    #videoMenu h2 { margin-bottom: 15px; }
+    #videoMenu button {
+      display: block;
+      margin: 8px auto;
+      padding: 8px 15px;
+      border: none;
+      background: #00796b;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #videoMenu button:hover { background: #004d40; }
+    #videoPlayer {
+      margin-top: 10px;
+      width: 300px;
+      display: none;
+    }
+    /* 音乐按钮 */
+    #musicControl {
+      margin-top: 15px;
+      padding: 8px 15px;
+      background: #ff9800;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      color: white;
+      font-size: 16px;
+    }
+    #musicControl:hover { background: #e68900; }
+  </style>
+</head>
+<body>
+  <h1>旺柴互动小游戏</h1>
+  <div id="score">分数：0</div>
+  <div id="timer">剩余时间：30 秒</div>
+
+  <div class="avatar">
+    <img id="dog" src="wangchai 1.png" alt="狗头">
+    <!-- 点击区域 -->
+    <div class="hotspot" style="left:80px; top:100px; width:50px; height:40px;" onclick="react(true, '眼睛', 10)"></div>
+    <div class="hotspot" style="left:120px; top:170px; width:60px; height:40px;" onclick="react(true, '嘴巴', 20)"></div>
+    <div class="hotspot" style="left:200px; top:50px; width:60px; height:60px;" onclick="react(false, '耳朵', -10)"></div>
+  </div>
+
+  <div id="reaction">👆 点击旺柴看看反应！</div>
+  <button id="musicControl" onclick="toggleMusic()">暂停音乐</button>
+
+  <!-- 背景音乐 -->
+  <audio id="bgm" src="bgm.mp3" autoplay loop></audio>
+
+  <!-- 视频菜单 -->
+  <div id="videoMenu">
+    <h2>🎬 菜单</h2>
+    <div id="videoOptions"></div>
+    <video id="videoPlayer" controls></video>
+  </div>
+
+  <script>
+    let score = 0;
+    let timeLeft = 30;
+    let countdown;
+    let hotspotMove;
+    let phase = 1; // 当前阶段
+
+    const faces = [
+      "wangchai 1.png","wangchai 2.png","wangchai 3.png",
+      "wangchai 4.png","wangchai 5.png","wangchai 6.png",
+      "wangchai 7.png","wangchai 8.png","wangchai 9.png","wangchai 10.png",
+      "wangchai 11.png","wangchai 12.png","wangchai 13.png","wangchai 14.png","wangchai 15.png",
+      "wangchai 16.png","wangchai 17.png","wangchai 18.png","wangchai 19.png","wangchai 20.png"
+    ];
+
+    const bgm = document.getElementById("bgm");
+    const musicBtn = document.getElementById("musicControl");
+
+    function startTimer() {
+      clearInterval(countdown);
+      countdown = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").innerText = "剩余时间：" + timeLeft + " 秒";
+        if (timeLeft <= 0) {
+          clearInterval(countdown);
+          alert("时间到！游戏结束！");
+        }
+      }, 1000);
+    }
+
+    function setPhase(newPhase) {
+      phase = newPhase;
+      clearInterval(hotspotMove);
+      if (phase === 1) {
+        timeLeft += 0;
+      } else if (phase === 2) {
+        if (timeLeft < 25) timeLeft = 25;
+        hotspotMove = setInterval(moveHotspots, 5000);
+      } else if (phase === 3) {
+        if (timeLeft < 20) timeLeft = 20;
+        hotspotMove = setInterval(moveHotspots, 5000);
+      }
+      document.getElementById("timer").innerText = "剩余时间：" + timeLeft + " 秒";
+      startTimer();
+    }
+
+    function react(correct, part, points) {
+      const randomFace = faces[Math.floor(Math.random() * faces.length)];
+      document.getElementById("dog").src = randomFace;
+
+      if (correct) {
+        score += points;
+        timeLeft += 2;
+      } else {
+        score += points;
+        timeLeft -= 3;
+      }
+      if (score < 0) score = 0;
+      document.getElementById("score").innerText = "分数：" + score;
+
+      document.getElementById("reaction").innerText =
+        (correct ? "✅" : "❌") + " 你点了旺柴的 " + part + " (积分 " + (points > 0 ? "+" : "") + points + ")";
+
+      if (score >= 100 && phase === 1) {
+        openMenu("🎉 你到达 100 分！选择一个视频：", [
+          {name:"开心", file:"happy.mp4"},
+          {name:"搞笑", file:"funny.mp4"},
+          {name:"神秘", file:"mystery.mp4"}
+        ]);
+        setPhase(2);
+      } else if (score >= 200 && phase === 2) {
+        openMenu("🎉 你到达 200 分！神秘菜单：", [
+          {name:"神秘", file:"secret.mp4"}
+        ]);
+        setPhase(3);
+      } else if (score >= 300) {
+        openMenu("🏆 300分满分！终极彩蛋：", [
+          {name:"终极彩蛋", file:"ultimate.mp4"}
+        ]);
+        clearInterval(countdown);
+      }
+    }
+
+    function moveHotspots() {
+      document.querySelectorAll(".hotspot").forEach(hs => {
+        hs.style.left = Math.random() * 200 + "px";
+        hs.style.top = Math.random() * 150 + "px";
+      });
+    }
+
+    function openMenu(title, options) {
+      clearInterval(countdown);
+      bgm.pause(); // 暂停背景音乐
+      document.getElementById("videoMenu").style.display = "block";
+      document.querySelector("#videoMenu h2").innerText = title;
+      const optionsDiv = document.getElementById("videoOptions");
+      optionsDiv.innerHTML = "";
+      options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.innerText = opt.name;
+        btn.onclick = () => playVideo(opt.file);
+        optionsDiv.appendChild(btn);
+      });
+    }
+
+    function playVideo(file) {
+      const player = document.getElementById("videoPlayer");
+      player.src = file;
+      player.style.display = "block";
+      player.play();
+      document.getElementById("videoOptions").innerHTML = "🎬 正在播放...";
+      player.onended = () => closeMenu();
+    }
+
+    function closeMenu() {
+      document.getElementById("videoMenu").style.display = "none";
+      const player = document.getElementById("videoPlayer");
+      player.pause();
+      player.style.display = "none";
+      bgm.play(); // 继续播放音乐
+      startTimer();
+    }
+
+    function toggleMusic() {
+      if (bgm.paused) {
+        bgm.play();
+        musicBtn.innerText = "暂停音乐";
+      } else {
+        bgm.pause();
+        musicBtn.innerText = "播放音乐";
+      }
+    }
+
+    setPhase(1);
+  </script>
+</body>
+</html>
